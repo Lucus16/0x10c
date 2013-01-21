@@ -3,6 +3,7 @@ package computer;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -609,8 +610,14 @@ public class DCPU
     for (int i = 0; i < hardware.size(); i++)
       ((DCPUHardware)hardware.get(i)).tick60hz();
   }
+  
+  private static String getHexRepr(int a) {
+	  String str = new String(Integer.toHexString(a).toUpperCase());
+	  str = new String(new char[4 - str.length()]).replace("\0", "0") + str;
+	  return str;
+  }
 
-  private static void attachDisplay(DCPU cpu)
+  private static void attachDisplay(final DCPU cpu)
   {
   	final VirtualClock clock = (VirtualClock) new VirtualClock().connectTo(cpu);
     final VirtualMonitor display = (VirtualMonitor)new VirtualMonitor().connectTo(cpu);
@@ -623,9 +630,9 @@ public class DCPU
           JFrame frame = new JFrame();
 
           Canvas canvas = new Canvas();
-          canvas.setPreferredSize(new Dimension(160 * SCALE, 128 * SCALE));
-          canvas.setMinimumSize(new Dimension(160 * SCALE, 128 * SCALE));
-          canvas.setMaximumSize(new Dimension(160 * SCALE, 128 * SCALE));
+          canvas.setPreferredSize(new Dimension(320 * SCALE, 128 * SCALE));
+          canvas.setMinimumSize(new Dimension(320 * SCALE, 128 * SCALE));
+          canvas.setMaximumSize(new Dimension(320 * SCALE, 128 * SCALE));
           canvas.setFocusable(true);
           canvas.addKeyListener(new KeyListener() {
             public void keyPressed(KeyEvent ke) {
@@ -647,7 +654,7 @@ public class DCPU
           frame.setDefaultCloseOperation(3);
           frame.setVisible(true);
 
-          BufferedImage img2 = new BufferedImage(160, 128, 2);
+          BufferedImage img2 = new BufferedImage(320, 128, 2);
           BufferedImage img = new BufferedImage(128, 128, 2);
           int[] pixels = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
           display.setPixels(pixels);
@@ -660,10 +667,25 @@ public class DCPU
             g.setColor(new Color(pixels[12288]));
             g.fillRect(0, 0, 160, 128);
             g.drawImage(img, 16, 16, 128, 128, null);
+            g.setColor(new Color(0xffffff));
+            g.fillRect(160, 0, 160, 128);
+            g.setColor(new Color(0));
+            g.setFont(new Font("Courier",Font.PLAIN,12));
+            g.drawString("A:  " + getHexRepr(cpu.registers[0]) + " [A]:  " + getHexRepr(cpu.ram[cpu.registers[0]]), 161, 10);
+            g.drawString("B:  " + getHexRepr(cpu.registers[1]) + " [B]:  " + getHexRepr(cpu.ram[cpu.registers[1]]), 161, 21);
+            g.drawString("C:  " + getHexRepr(cpu.registers[2]) + " [C]:  " + getHexRepr(cpu.ram[cpu.registers[2]]), 161, 32);
+            g.drawString("X:  " + getHexRepr(cpu.registers[3]) + " [X]:  " + getHexRepr(cpu.ram[cpu.registers[3]]), 161, 43);
+            g.drawString("Y:  " + getHexRepr(cpu.registers[4]) + " [Y]:  " + getHexRepr(cpu.ram[cpu.registers[4]]), 161, 54);
+            g.drawString("Z:  " + getHexRepr(cpu.registers[5]) + " [Z]:  " + getHexRepr(cpu.ram[cpu.registers[5]]), 161, 65);
+            g.drawString("I:  " + getHexRepr(cpu.registers[6]) + " [I]:  " + getHexRepr(cpu.ram[cpu.registers[6]]), 161, 76);
+            g.drawString("J:  " + getHexRepr(cpu.registers[7]) + " [J]:  " + getHexRepr(cpu.ram[cpu.registers[7]]), 161, 87);
+            g.drawString("PC: " + getHexRepr(cpu.pc) + " [PC]: " + getHexRepr(cpu.ram[cpu.pc]), 161, 98);
+            g.drawString("SP: " + getHexRepr(cpu.sp) + " [SP]: " + getHexRepr(cpu.ram[cpu.sp]), 161, 109);
+            g.drawString("IA: " + getHexRepr(cpu.ia) + "  EX : " + getHexRepr(cpu.ex), 161, 120);
             g.dispose();
 
             g = canvas.getGraphics();
-            g.drawImage(img2, 0, 0, 160 * SCALE, 128 * SCALE, null);
+            g.drawImage(img2, 0, 0, 320 * SCALE, 128 * SCALE, null);
             g.dispose();
             Thread.sleep(1L);
           }
